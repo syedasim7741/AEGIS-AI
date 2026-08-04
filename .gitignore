@@ -84,3 +84,11 @@ Thumbs.db
 
 # Local source backups
 aegis-ai-frontend-src-backup/
+
+# Temporary and backup files
+*.backup
+*.bak
+*.orig
+*.tmp
+*.encoding-backup
+*.pre-*-backup
