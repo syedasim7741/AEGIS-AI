@@ -84,6 +84,5 @@ jobs:
 
       - name: Display image summary
         run: |
-          docker image ls \
-            aegis-ai-backend:ci \
-            aegis-ai-frontend:ci
+          docker image ls aegis-ai-backend:ci
+          docker image ls aegis-ai-frontend:ci
