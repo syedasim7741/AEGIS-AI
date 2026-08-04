@@ -1,0 +1,18 @@
+﻿vulnerabilities:
+  - id: GHSA-6v7p-g79w-8964
+    purls:
+      - "pkg:pypi/msgpack@1.1.2"
+    expired_at: 2026-11-04
+    statement: >-
+      Verified false positive from third-party SBOM metadata inherited from
+      the Python base image. The final runtime filesystem contains only
+      msgpack 1.2.1, which is the patched version.
+
+  - id: CVE-2025-47273
+    purls:
+      - "pkg:pypi/setuptools@70.3.0"
+    expired_at: 2026-11-04
+    statement: >-
+      Verified false positive from third-party SBOM metadata inherited from
+      the Python base image. The final runtime filesystem contains only
+      setuptools 83.0.0, which is newer than the fixed version 78.1.1.

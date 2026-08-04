@@ -1,0 +1,122 @@
+name: aegis-ai
+
+services:
+  postgres:
+    image: pgvector/pgvector:pg18-trixie
+    container_name: aegis-postgres
+    restart: unless-stopped
+
+    environment:
+      POSTGRES_DB: ${POSTGRES_DB}
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+
+    ports:
+      - "${POSTGRES_HOST_PORT}:5432"
+
+    volumes:
+      - aegis_postgres_data:/var/lib/postgresql
+      - ./docker/postgres/init:/docker-entrypoint-initdb.d:ro
+
+    healthcheck:
+      test:
+        - CMD-SHELL
+        - pg_isready -U $${POSTGRES_USER} -d $${POSTGRES_DB}
+      interval: 10s
+      timeout: 5s
+      retries: 10
+      start_period: 10s
+
+    networks:
+      - aegis_network
+
+
+  backend:
+    container_name: aegis-backend
+    restart: unless-stopped
+
+    build:
+      context: ./aegis-ai-backend
+      dockerfile: Dockerfile
+
+    env_file:
+      - ./aegis-ai-backend/.env
+
+    environment:
+      DATABASE_HOST: postgres
+      DATABASE_PORT: "5432"
+      DATABASE_NAME: ${POSTGRES_DB}
+      DATABASE_USER: ${POSTGRES_USER}
+      DATABASE_PASSWORD: ${POSTGRES_PASSWORD}
+
+      OLLAMA_BASE_URL: http://host.docker.internal:11434
+
+      FRONTEND_ORIGINS: >-
+        ["http://localhost:8080","http://127.0.0.1:8080"]
+
+    ports:
+      - "8000:8000"
+
+    volumes:
+      - ./aegis-ai-backend/storage:/app/storage
+      - ./aegis-ai-backend/customization/reports:/app/customization/reports
+
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+
+    depends_on:
+      postgres:
+        condition: service_healthy
+
+    healthcheck:
+      test:
+        - CMD-SHELL
+        - curl --fail http://127.0.0.1:8000/health || exit 1
+      interval: 30s
+      timeout: 10s
+      retries: 5
+      start_period: 45s
+
+    networks:
+      - aegis_network
+
+
+  frontend:
+    container_name: aegis-frontend
+    restart: unless-stopped
+
+    build:
+      context: ./aegis-ai-frontend
+      dockerfile: Dockerfile
+      args:
+        VITE_API_BASE_URL: /api/v1
+
+    ports:
+      - "8080:8080"
+
+    depends_on:
+      backend:
+        condition: service_healthy
+
+    healthcheck:
+      test:
+        - CMD-SHELL
+        - wget --no-verbose --tries=1 --spider http://127.0.0.1:8080/health || exit 1
+      interval: 30s
+      timeout: 5s
+      retries: 5
+      start_period: 15s
+
+    networks:
+      - aegis_network
+
+
+volumes:
+  aegis_postgres_data:
+    name: aegis_postgres_data
+
+
+networks:
+  aegis_network:
+    name: aegis_network
+    driver: bridge
