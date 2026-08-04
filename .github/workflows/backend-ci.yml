@@ -57,6 +57,18 @@ jobs:
           python -m pip install --requirement requirements-dev.txt
           python -m pip install pip-audit
 
+      - name: Create temporary CI Docker secret file
+        run: |
+          python - <<'PY'
+          from pathlib import Path
+          from secrets import token_urlsafe
+
+          Path(".env.docker").write_text(
+              f"POSTGRES_PASSWORD={token_urlsafe(32)}\n",
+              encoding="utf-8",
+          )
+          PY
+
       - name: Validate secret protection
         run: |
           python scripts/security/validate_secret_protection.py
