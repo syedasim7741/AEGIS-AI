@@ -1,0 +1,58 @@
+name: Frontend CI
+
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - "aegis-ai-frontend/**"
+      - ".github/workflows/frontend-ci.yml"
+
+  pull_request:
+    branches:
+      - main
+    paths:
+      - "aegis-ai-frontend/**"
+      - ".github/workflows/frontend-ci.yml"
+
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: frontend-ci-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  frontend-quality:
+    name: Test, build and audit frontend
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v7
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v6
+        with:
+          node-version: "24"
+          cache: npm
+          cache-dependency-path: aegis-ai-frontend/package-lock.json
+
+      - name: Install frontend dependencies
+        working-directory: aegis-ai-frontend
+        run: npm ci
+
+      - name: Run frontend tests
+        working-directory: aegis-ai-frontend
+        run: npm test
+
+      - name: Build production frontend
+        working-directory: aegis-ai-frontend
+        run: npm run build
+
+      - name: Audit JavaScript dependencies
+        working-directory: aegis-ai-frontend
+        run: npm audit --audit-level=high
