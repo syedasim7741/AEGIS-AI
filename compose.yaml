@@ -30,7 +30,6 @@ services:
     networks:
       - aegis_network
 
-
   backend:
     container_name: aegis-backend
     restart: unless-stopped
@@ -71,7 +70,7 @@ services:
     healthcheck:
       test:
         - CMD-SHELL
-        - curl --fail http://127.0.0.1:8000/health || exit 1
+        - python -c "import urllib.request; urllib.request.urlopen('http://127.0.0.1:8000/health', timeout=5)"
       interval: 30s
       timeout: 10s
       retries: 5
@@ -79,7 +78,6 @@ services:
 
     networks:
       - aegis_network
-
 
   frontend:
     container_name: aegis-frontend
@@ -110,11 +108,9 @@ services:
     networks:
       - aegis_network
 
-
 volumes:
   aegis_postgres_data:
     name: aegis_postgres_data
-
 
 networks:
   aegis_network:
