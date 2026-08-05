@@ -418,3 +418,322 @@ Use local environment variables and secure secret-management services for produc
 The current prototype includes a working end-to-end flow from industrial telemetry to predictive assessment and maintenance work-order completion.
 
 The application is designed as a portfolio-ready enterprise AI and industrial operations demonstration.
+
+---
+
+## Advanced AI Capabilities
+
+### Retrieval-Augmented Generation
+
+The RAG module allows users to upload and search industrial documents such as:
+
+- Equipment manuals
+- Safety procedures
+- Maintenance instructions
+- Inspection reports
+- Operational documentation
+
+The RAG architecture includes:
+
+- Document loading
+- Text chunking
+- Embedding generation
+- PostgreSQL vector storage
+- Semantic search
+- Context retrieval
+- AI-generated answers
+- Source-aware responses
+
+The implementation supports local AI providers so the portfolio can operate
+without requiring a paid API.
+
+### Agentic AI
+
+The Agentic AI module demonstrates multi-step operational reasoning.
+
+It includes:
+
+- Planner service
+- Tool registry
+- Tool executor
+- Agent runner
+- Response-generation service
+- Document-search tools
+- Operations-monitoring tools
+- Maintenance work-order tools
+- Structured execution results
+
+The agent can select approved tools, gather operational information, execute a
+controlled workflow, and produce a final response.
+
+### Computer Vision
+
+The Computer Vision module supports industrial image inspection.
+
+Its architecture includes:
+
+- Image upload and validation
+- Secure image storage
+- Inspection schemas
+- Ollama vision-model integration
+- Inspection-result persistence
+- Severity and confidence reporting
+- API endpoints for inspection workflows
+
+Potential use cases include:
+
+- Personal protective equipment detection
+- Equipment-condition inspection
+- Safety-hazard identification
+- Manufacturing defect analysis
+- Workplace-compliance review
+
+### Local Model Customization
+
+AEGIS AI includes a model-customization workflow based on Ollama Modelfiles and
+industrial evaluation datasets.
+
+The project contains:
+
+- Industrial instruction datasets
+- Dataset validation
+- Multiple model prompt versions
+- Structured evaluation cases
+- Evaluation-result processing
+- Human adjudication records
+- Production model release configuration
+
+The selected customized model is published locally as:
+
+```text
+aegis-industrial-assistant:production
+```
+
+This demonstrates prompt-level model customization and evaluation. It is not
+presented as full-weight training or LoRA fine-tuning.
+
+---
+
+## Docker and Local Production Environment
+
+AEGIS AI includes production-style Docker configuration for:
+
+- FastAPI backend
+- React frontend
+- PostgreSQL with pgvector
+- Persistent database storage
+- Internal Docker networking
+- Environment-variable injection
+- Backend and frontend health checks
+
+Start the complete local container environment from the project root:
+
+```powershell
+docker compose --env-file .env.docker up --build
+```
+
+Default local service addresses:
+
+```text
+Frontend: http://localhost:8080
+Backend:  http://localhost:8000
+Health:   http://localhost:8000/health
+Database host port: 5433
+```
+
+Stop the containers using:
+
+```powershell
+docker compose --env-file .env.docker down
+```
+
+The PostgreSQL volume remains persistent unless volumes are explicitly removed.
+
+---
+
+## Automated Testing
+
+### Backend
+
+Backend tests use Pytest.
+
+Run locally:
+
+```powershell
+cd aegis-ai-backend
+python -m pytest -q
+```
+
+The system tests verify:
+
+- Root API route
+- Health endpoint
+- Health-route OpenAPI exclusion
+
+### Frontend
+
+Frontend tests use Vitest.
+
+Run locally:
+
+```powershell
+cd aegis-ai-frontend
+npm test
+```
+
+Create a production build using:
+
+```powershell
+npm run build
+```
+
+---
+
+## Security Verification
+
+The project includes several security controls:
+
+- Environment and secret-file protection
+- Git secret-exposure validation
+- Python dependency auditing
+- JavaScript dependency auditing
+- Docker container vulnerability scanning
+- Non-root container users
+- Health checks
+- Ignored local credentials
+- Documented vulnerability-scan exceptions
+
+Run the secret-protection validator from the project root:
+
+```powershell
+python scripts/security/validate_secret_protection.py
+```
+
+Run the Python dependency audit:
+
+```powershell
+cd aegis-ai-backend
+python -m pip_audit --requirement requirements.txt
+```
+
+Run the JavaScript dependency audit:
+
+```powershell
+cd aegis-ai-frontend
+npm audit --audit-level=high
+```
+
+The documented Trivy exception is limited to verified stale third-party SBOM
+metadata. The final runtime filesystem contains patched package versions.
+
+---
+
+## GitHub Actions CI/CD
+
+The repository includes three automated GitHub Actions workflows.
+
+### Backend CI
+
+The backend workflow:
+
+- Installs Python dependencies
+- Creates temporary CI-only secrets
+- Validates secret protection
+- Checks package compatibility
+- Runs backend tests
+- Audits Python dependencies
+
+### Frontend CI
+
+The frontend workflow:
+
+- Installs dependencies using `npm ci`
+- Runs frontend tests
+- Creates the production build
+- Audits JavaScript dependencies
+
+### Docker Build
+
+The Docker workflow:
+
+- Builds the backend image
+- Builds the frontend image
+- Verifies the backend runtime
+- Verifies the Nginx frontend runtime
+- Displays the resulting image summaries
+
+All three workflows run automatically when relevant files change.
+
+---
+
+## Quick Start
+
+### Requirements
+
+Install:
+
+- Git
+- Docker Desktop
+- Node.js
+- Python
+- Ollama
+
+### Clone the Repository
+
+```powershell
+git clone https://github.com/syedasim7741/AEGIS-AI.git
+cd AEGIS-AI
+```
+
+### Create Local Environment Configuration
+
+Copy the public Docker environment example:
+
+```powershell
+Copy-Item .env.docker.example .env.docker
+```
+
+Replace all placeholder values in `.env.docker` with strong local values.
+
+Never commit `.env.docker`.
+
+### Start AEGIS AI
+
+```powershell
+docker compose --env-file .env.docker up --build
+```
+
+Wait until PostgreSQL, the backend, and the frontend become healthy.
+
+Open:
+
+```text
+http://localhost:8080
+```
+
+---
+
+## Deployment Readiness
+
+AEGIS AI is prepared for a future container-based deployment through:
+
+- Dockerized services
+- Database migrations
+- Health endpoints
+- Secret protection
+- Automated tests
+- Dependency auditing
+- Container scanning
+- GitHub Actions workflows
+- Backup and restore verification
+
+No live AWS infrastructure has been created.
+
+The deployment-readiness documentation is architecture guidance only and does
+not create any paid resource or cloud charge.
+
+See:
+
+```text
+deployment/aws/README.md
+```
